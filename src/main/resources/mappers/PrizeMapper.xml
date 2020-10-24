@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bigliang.e_commerce.mapper.PrizeMapper">
+    <select id="getAllPrizes" resultType="prize" parameterType="string">
+        select * from prize where referenceTo = #{actID}
+    </select>
+
+    <insert id="addPrizes" parameterType="prize">
+        insert into prize(prizeID, prizeName, prizeLevel, prizeType, prizeCount, referenceTo, prizeWeight)
+        values
+        <foreach collection="list" item="prize" separator=",">
+            (#{prize.prizeID}, #{prize.prizeName}, #{prize.prizeLevel}, #{prize.prizeType}, #{prize.prizeCount}, #{prize.referenceTo}, #{prize.prizeWeight} )
+        </foreach>
+    </insert>
+
+    <update id="cutPrize" parameterType="map">
+        update prize set prizeCount = prizeCount - 1 where prizeCount > 0 and prizeID = #{prizeID} and referenceTo = #{actID}
+    </update>
+
+    <delete id="delPrize" parameterType="map">
+        delete from prize where referenceTo = #{actID}
+    </delete>
+
+</mapper>

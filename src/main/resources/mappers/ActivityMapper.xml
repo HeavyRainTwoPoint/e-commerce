@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bigliang.e_commerce.mapper.ActivityMapper">
+    <select id="getAllActivity" resultType="activity">
+        select * from activity
+    </select>
+
+    <insert id="addActivity" parameterType="activity">
+        insert into activity(actID, actName, actType, limited, actDescribe, wayOfAwarding, startTime, endTime)
+        values(#{actID}, #{actName}, #{actType}, #{limited}, #{actDescribe}, #{wayOfAwarding}, #{startTime}, #{endTime})
+    </insert>
+
+    <delete id="delActivity" parameterType="string">
+        delete from activity where actID = #{actID}
+    </delete>
+
+    <select id="searchOnLimited" parameterType="activity" resultType="activity">
+        select * from activity
+        <where>
+            <if test="actID != null and actID != ''">
+                and actID = #{actID}
+            </if>
+            <if test="actName != null and actName != ''">
+                and actName = #{actName}
+            </if>
+            <if test="actStatus > 0">
+                and actStatus = #{actStatus}
+            </if>
+            <if test="endTime != null">
+                and endTime = #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 关联查询 start -->
+    <resultMap id="actAndPrizeBean" type="com.bigliang.e_commerce.po.ActandPrize">
+        <id property="activity.actID" column="actID"/>
+        <result property="activity.actName" column="actName"/>
+        <result property="activity.actType" column="actType"/>
+        <result property="activity.limited" column="limited"/>
+        <result property="activity.actDescribe" column="actDescribe"/>
+        <result property="activity.wayOfAwarding" column="WayOfwarding"/>
+        <result property="activity.startTime" column="startTime"/>
+        <result property="activity.endTime" column="endTime"/>
+        <collection property="prizeList" ofType="prize">
+            <result property="prizeID" column="prizeID"/>
+            <result property="prizeName" column="prizeName"/>
+            <result property="prizeLevel" column="prizeLevel"/>
+            <result property="prizeType" column="prizeType"/>
+            <result property="prizeCount" column="prizeCount"/>
+            <result property="referenceTo" column="referenceTo"/>
+            <result property="prizeWeight" column="prizeWeight" />
+        </collection>
+    </resultMap>
+
+    <select id="selectByActID" resultMap="actAndPrizeBean" parameterType="string">
+        select * from activity, prize where actID = #{actID} and actID = referenceTo;
+    </select>
+
+    <!--  关联查询 end  -->
+
+    <select id="getStartActivity" resultType="activity">
+        select * from activity where actStatus = 3 AND date(startTime) = date(now())
+    </select>
+
+    <update id="startActivity">
+        update activity set actStatus = 2 where date(now()) and actStatus = 3
+    </update>
+
+    <update id="stopActivity">
+        update activity set actStatus = 1 where date(endTime) = date(now()) - 1 and actStatus = 2
+    </update>
+
+    <select id="getStopActivity" resultType="string">
+        select actID from activity where date(endTime) = date(now()) - 1 and actStatus = 1
+    </select>
+
+    <!--  记录参与定时抽奖的用户  -->
+    <insert id="joinTimingLottery" parameterType="waitActivity" >
+        insert into waitActivity(userID, actID) values(#{userId}, #{actId})
+    </insert>
+
+    <!--  获取参与某个活动的用户日志  -->
+    <select id="getAllWait" resultType="waitActivity" parameterType="String">
+        select * from waitActivity where actID = #{actID}
+    </select>
+
+    <insert id="writeTimingLog" parameterType="collection">
+        insert into activitylog(userID, prizeID, actID)
+        values
+        <foreach collection="collection" separator="," item="activitylog">
+            (#{activitylog.userId}, #{activitylog.prizeId}, #{activitylog.actId})
+        </foreach>
+    </insert>
+
+    <insert id="writeSpikeLog" parameterType="activitylog">
+        insert into activitylog(userID, prizeID, actID)
+        values (#{userId}, #{prizeId}, #{actId})
+    </insert>
+
+    <delete id="delActByID" parameterType="string" >
+        delete from activity where actID = #{actID}
+    </delete>
+
+    <select id="isJoined" parameterType="string" resultType="int">
+        select count(id) from waitActivity where userID = #{userID};
+    </select>
+
+</mapper>

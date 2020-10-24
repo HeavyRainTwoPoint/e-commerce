@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bigliang.e_commerce.mapper.GoodsMapper">
+    <select id="getAllGoods" parameterType="com.bigliang.e_commerce.po.PageBean" resultType="goods">
+        select id, goodsID, goodsName, goodsCount, goodsPrice, goodsStatus, goodsUnit, referToBrand from goods limit #{targetPage}, #{limit}
+    </select>
+
+    <select id="getTotalCount" resultType="int">
+        select count(id) from goods
+    </select>
+
+    <insert id="addGoods">
+        insert into goods(goodsID, goodsName, goodsCount, goodsPrice, goodsDescribe, goodsStatus, goodsUnit, referToBrand, categoryID)
+        values
+        (#{goodsID}, #{goodsName}, #{goodsCount}, #{goodsPrice}, #{goodsDescribe}, #{goodsStatus}, #{goodsUnit}, #{referToBrand}, #{categoryID})
+    </insert>
+
+    <resultMap id="maxGoods" type="goods" >
+        <id column="id" property="id" />
+        <result column="goodsID" property="goodsID" />
+        <result column="goodsName" property="goodsName" />
+        <result column="goodsStatus" property="goodsStatus" />
+        <result column="goodsCount" property="goodsCount" />
+        <result column="goodsPrice" property="goodsPrice" />
+        <result column="goodsUnit" property="goodsUnit" />
+        <result column="goodsDescribe" property="goodsDescribe" />
+        <result column="referToBrand" property="referToBrand" />
+        <result column="categoryID" property="categoryID" />
+        <result column="categoryName" property="categoryName" />
+    </resultMap>
+    <select id="getGoodsDetails" parameterType="string" resultType="goods">
+        select goods.*, category.categoryName from goods, category where goods.categoryID = category.categoryID and goods.goodsID = #{goodsID}
+    </select>
+
+    <delete id="delGoods" parameterType="string">
+        delete from goods where goodsID = goodsID
+    </delete>
+
+    <update id="updateGoods" parameterType="goods">
+        update goods set goodsName = #{goodsName}, goodsCount = #{goodsCount}, goodsPrice = #{goodsPrice} where goodsID = #{goodsID}
+    </update>
+
+    <update id="updateGoodsStatus" parameterType="map">
+        update goods set goodsStatus = #{goodsStatus} where goodsID = #{goodsID}
+    </update>
+
+    <select id="search" resultType="goods" >
+        select id, goodsID, goodsName, goodsCount, goodsPrice, goodsStatus, goodsUnit, referToBrand
+        from goods
+        <where>
+            <if test="param1.goodsName != null and param1.goodsName != ''">
+                and goodsName like concat('%',#{param1.goodsName}, '%')
+            </if>
+            <if test="param1.goodsID != null and param1.goodsID != ''">
+                and goodsID = #{param1.goodsID}
+            </if>
+            <if test="param1.categoryID != null and param1.categoryID != ''">
+                and categoryID = #{param1.categoryID}
+            </if>
+            <if test="param1.referToBrand != null and param1.referToBrand != ''">
+                and referToBrand = #{param1.referToBrand}
+            </if>
+            <if test="param1.goodsStatus != null and param1.goodsStatus != ''">
+                and goodsStatus = #{param1.goodsStatus}
+            </if>
+        </where>
+        limit #{param2}, #{param3}
+    </select>
+
+</mapper>

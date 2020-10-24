@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bigliang.e_commerce.mapper.BrandMapper">
+    <select id="getAllBrand" resultType="brand">
+        select * from brand;
+    </select>
+
+    <insert id="addBrand">
+        insert into brand(brandName) values(#{brandName})
+    </insert>
+
+    <delete id="delBrand" parameterType="string">
+        delete from brand where brandName = #{brandName}
+    </delete>
+
+    <update id="updateBrand" parameterType="map">
+        update brand set brandName = #{newName} where brandName = #{oldName}
+    </update>
+
+    <!-- 关联查询start -->
+    <resultMap id="brandWithGoods" type="com.bigliang.e_commerce.po.BrandandGoods">
+        <result property="brand.brandName" column="brandName" />
+        <collection property="goodsList"  ofType="goods">
+            <id property="id" column="id" />
+            <result property="goodsID" column="goodsID" />
+            <result property="goodsName" column="goodsName" />
+            <result property="goodsCount" column="goodsCount" />
+            <result property="goodsPrice" column="goodsPrice" />
+            <result property="goodsDescribe" column="goodsDescribe" />
+            <result property="goodsStatus" column="goodsStatus" />
+            <result property="goodsUnit" column="goodsUnit" />
+        </collection>
+    </resultMap>
+    <select id="getGoodsByBrand" parameterType="string" resultMap="brandWithGoods">
+        select brand.brandName, goods.id, goods.goodsID, goods.goodsName, goods.goodsCount, goods.goodsPrice, goods.goodsDescribe, goods.goodsStatus, goods.goodsUnit
+        from brand, goods where brandName = #{brandName} and brandName = referToBrand
+    </select>
+    <!-- end -->
+</mapper>

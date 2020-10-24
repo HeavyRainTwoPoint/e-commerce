@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bigliang.e_commerce.mapper.UserMapper">
+    <insert id="addUsers" parameterType="list">
+        insert into user(userID, userNickname, loginAccount, password, address, birthday, loginCount, imagePath)
+        values
+        <foreach collection="list" item="user" separator=",">
+            (#{user.userID}, #{user.userNickname}, #{user.loginAccount}, #{user.password}, #{user.address},
+            #{user.birthday}, #{user.loginCount}, #{user.imagePath})
+        </foreach>
+    </insert>
+
+    <insert id="addUser" parameterType="user">
+        insert into user(userID, userNickname, loginAccount, password, address, birthday, loginCount, imagePath)
+        values
+        (#{userID}, #{userNickname}, #{loginAccount}, #{password}, #{address}, #{birthday}, #{loginCount}, #{imagePath})
+    </insert>
+
+    <update id="updateUserImage" parameterType="map">
+        update user set imagePath = #{imagePath} where userID = #{userID}
+    </update>
+
+    <update id="updateLoginCount" parameterType="string">
+        update user set loginCount = loginCount + 1 where userID = #{userID}
+    </update>
+
+    <select id="checkLogin" resultType="int" parameterType="map">
+        select count(*) from user where loginAccount = #{loginAccount} and password = #{password}
+    </select>
+
+    <select id="getUserByID" resultType="User" parameterType="string">
+        select * from user where userID = #{userID}
+    </select>
+</mapper>

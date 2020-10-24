@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bigliang.e_commerce.mapper.OrderMapper">
+    <insert id="addOrder" parameterType="order">
+        insert into orders(orderID, userID, orderStatus)
+        values
+        (#{orderID}, #{userID}, #{orderStatus})
+    </insert>
+
+    <insert id="addOrderDetail" parameterType="orderDetails">
+        insert into orderDetails(orderID, goodsID, count) values(#{orderID}, #{goodsID}, #{count})
+    </insert>
+
+    <update id="updateOrderStatus" parameterType="map">
+        update orders set orderStatus = #{orderStatus}
+        where orderID = #{orderID}
+    </update>
+
+    <delete id="delOrder" parameterType="string">
+        delete from orders where orderID = #{orderID}
+    </delete>
+
+    <delete id="delOrderDetail" parameterType="string">
+        delete from orderDetails where orderID = #{orderID}
+    </delete>
+
+    <select id="getAll" resultType="Order" parameterType="com.bigliang.e_commerce.po.PageBean">
+        select * from orders limit #{targetPage}, #{limit}
+    </select>
+
+    <select id="totalCount" resultType="int">
+        select count(id) from orders;
+    </select>
+
+    <select id="searchByLimit" resultType="order" parameterType="map">
+        select * from orders
+        <where>
+            <if test="orderID != '' and orderID != null">
+                orderID = #{orderID}
+            </if>
+            <if test="orderStatus > -3">
+                and orderStatus = #{orderStatus}
+            </if>
+            <if test="userID != '' and userID != null">
+                and userID = #{userID}
+            </if>
+            <if test="createTime != null">
+                and createTime = #{createTime}
+            </if>
+        </where>
+        limit #{targetPage}, #{limit}
+    </select>
+
+    <select id="getSearchTotalCount" resultType="int" parameterType="map">
+        select count(id) from orders
+        <where>
+            <if test="#{orderID} != '' and #{orderID} != null">
+                orderID = #{orderID}
+            </if>
+            <if test="orderStatus > -3">
+                and orderStatus = #{orderStatus}
+            </if>
+            <if test="#{userID} != '' and #{userID} != null">
+                and userID = #{userID}
+            </if>
+            <if test="#{createTime} != null">
+                and createTime = #{createTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 关联查询开始 start -->
+    <select id="getDetail" resultMap="orderDetail" parameterType="string">
+        select o.*, od.count, g.* from orders as o, orderDetails as od, goods as g WHERE g.goodsID =
+od.goodsID and o.orderID = od.orderID and o.orderID = #{orderID};
+    </select>
+    <resultMap id="orderDetail" type="com.bigliang.e_commerce.po.OrderforDetail">
+        <id column="id" property="order.id"/>
+        <result column="orderID" property="order.orderID" />
+        <result column="userID" property="order.userID" />
+        <result column="createTime" property="order.createTime" />
+        <result column="orderStatus" property="order.orderStatus" />
+        <collection property="goodsList" ofType="goods">
+            <result column="goodsID" property="goodsID" />
+            <result column="goodsName" property="goodsName" />
+            <result column="goodsPrice" property="goodsPrice" />
+            <result column="goodsDescribe" property="goodsDescribe" />
+            <result column="count" property="count" />
+            <result column="goodsUnit" property="goodsUnit" />
+            <result column="referToBrand" property="referToBrand" />
+        </collection>
+    </resultMap>
+
+    <!-- end -->
+</mapper>
